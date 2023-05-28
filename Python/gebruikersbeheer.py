@@ -25,6 +25,7 @@ def create_user(username, full_name, email, klasgroep, password, ssh_public_key)
     # Kijk na of er een wachtwoord is opgegeven en geef dit door aan het commando
     if password:
         cmd += f" -p '{password}'"
+    cmd += f" '{username}'"
     # Voer het commando uit om de user toe te voegen
     os.system(cmd)
 
