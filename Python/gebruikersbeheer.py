@@ -57,7 +57,7 @@ def create_user(username, full_name, email, klasgroep, password, ssh_public_key)
 def process_csv(csv_file):
     # Open bestand in readmode
     with open(csv_file, 'r') as f:
-        reader = csv.reader(f)
+        reader = csv.reader(f, delimiter=';')
         # Sla header van csv over en lees enkel de data uit
         header = next(reader)
         for row in reader:
