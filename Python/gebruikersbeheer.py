@@ -103,28 +103,26 @@ if len(sys.argv) >= 3:
         csv_file = sys.argv[2]
         # Voer process_csv functie uit
         process_csv(csv_file)
-    else:
-        print("Gebruik: gebruikersbeheer.py -c <CSV-bestand>")
-# Kijk na of de 2de parameter '-g' of '--group' is
-elif sys.argv[1] == '-g' or sys.argv[1] == '--group':
-    # Kijk na of de 4de parameter '-f' is
-    if sys.argv[3] == '-f':
-        group_name = sys.argv[2]
-        file_path = sys.argv[4]
-        # Kijk na of het bestand bestaat
-        if os.path.isfile(file_path):
-            # Open het bestand in readmode
-            with open(file_path, 'r') as f:
-                # Gebruik splitlines om elke user op een aparte lijn te nemen en in de lijst users te steken
-                users = f.read().splitlines()
+    # Kijk na of de 2de parameter '-g' of '--group' is
+    elif sys.argv[1] == '-g' or sys.argv[1] == '--group':
+        # Kijk na of de 4de parameter '-f' is
+        if sys.argv[3] == '-f':
+            group_name = sys.argv[2]
+            file_path = sys.argv[4]
+            # Kijk na of het bestand bestaat
+            if os.path.isfile(file_path):
+                # Open het bestand in readmode
+                with open(file_path, 'r') as f:
+                    # Gebruik splitlines om elke user op een aparte lijn te nemen en in de lijst users te steken
+                    users = f.read().splitlines()
+                # Maak de groep aan met elke user in de groep users
+                create_group(group_name, users)
+            else:
+                print(f"Bestand '{file_path}' bestaat niet.")
+        else:
+            group_name = sys.argv[2]
+            users = sys.argv[3:]
             # Maak de groep aan met elke user in de groep users
             create_group(group_name, users)
-        else:
-            print(f"Bestand '{file_path}' bestaat niet.")
-    else:
-        group_name = sys.argv[2]
-        users = sys.argv[3:]
-        # Maak de groep aan met elke user in de groep users
-        create_group(group_name, users)
 else:
     print("Geef meer opties: minstens -c of -g")
