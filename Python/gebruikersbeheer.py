@@ -103,7 +103,7 @@ parser = argparse.ArgumentParser(description='Script voor het beheren van gebrui
 
 # Voeg argumenten toe
 parser.add_argument('-c', '--create', metavar='FILE', help='Maak gebruikers aan op basis van een CSV-bestand.')
-parser.add_argument('-g', '--group', metavar='GROUP_NAME', help='Maak een nieuwe groep aan.')
+parser.add_argument('-g', '--group', nargs='+', metavar=('GROUP_NAME', 'USERS'), help='Maak een nieuwe groep aan en voeg gebruikers toe.')
 parser.add_argument('-f', '--file', metavar='FILE', help='Bestand met lijst van gebruikers (een per regel).')
 
 # Parse de command line argumenten
@@ -115,19 +115,19 @@ if args.create:
     # Voer process_csv functie uit
     process_csv(csv_file)
 elif args.group:
-    group_name = args.group
+    group_name = args.group[0]
+    users = args.group[1:]
     if args.file:
-        file_path = args.file
         # Kijk na of het bestand bestaat
-        if os.path.isfile(file_path):
+        if os.path.isfile(args.file):
             # Open het bestand in readmode
-            with open(file_path, 'r') as f:
+            with open(args.file, 'r') as f:
                 # Gebruik splitlines om elke gebruiker op een aparte regel te nemen en in de lijst users te steken
-                users = f.read().splitlines()
+                users += f.read().splitlines()
+        else:
+            print(f"Bestand '{args.file}' bestaat niet.")
             # Maak de groep aan met elke gebruiker in de groep users
             create_group(group_name, users)
-        else:
-            print(f"Bestand '{file_path}' bestaat niet.")
     else:
         users = sys.argv[3:]
         # Maak de groep aan met elke gebruiker in de groep users
