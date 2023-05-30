@@ -6,6 +6,7 @@ import os
 import pwd
 import grp
 import subprocess
+import argparse
 
 
 # Functie voor het aanmaken van nieuwe gebruikers
@@ -97,33 +98,39 @@ def create_group(group_name, users):
             print(f"Gebruiker '{user}' bestaat niet. Toevoegen aan groep '{group_name}' mislukt.")
 
 
-# Kijk na of er minstens 3 parameters zijn meegegeven
-if len(sys.argv) >= 3:
-    # Kijk na of de tweede parameter '-c' of '--create' is
-    if sys.argv[1] == '-c' or sys.argv[1] == '--create':
-        csv_file = sys.argv[2]
-        # Voer process_csv functie uit
-        process_csv(csv_file)
-    # Kijk na of de tweede parameter '-g' of '--group' is
-    elif sys.argv[1] == '-g' or sys.argv[1] == '--group':
-        # Kijk na of de vierde parameter '-f' is
-        if sys.argv[3] == '-f':
-            group_name = sys.argv[2]
-            file_path = sys.argv[4]
-            # Kijk na of het bestand bestaat
-            if os.path.isfile(file_path):
-                # Open het bestand in readmode
-                with open(file_path, 'r') as f:
-                    # Gebruik splitlines om elke gebruiker op een aparte lijn te nemen en in de lijst users te steken
-                    users = f.read().splitlines()
-                # Maak de groep aan met elke gebruiker in de groep users
-                create_group(group_name, users)
-            else:
-                print(f"Bestand '{file_path}' bestaat niet.")
-        else:
-            group_name = sys.argv[2]
-            users = sys.argv[3:]
+# Maak een argumentparser
+parser = argparse.ArgumentParser(description='Script voor het beheren van gebruikers en groepen.')
+
+# Voeg argumenten toe
+parser.add_argument('-c', '--create', metavar='FILE', help='Maak gebruikers aan op basis van een CSV-bestand.')
+parser.add_argument('-g', '--group', metavar='GROUP_NAME', help='Maak een nieuwe groep aan.')
+parser.add_argument('-f', '--file', metavar='FILE', help='Bestand met lijst van gebruikers (een per regel).')
+
+# Parse de command line argumenten
+args = parser.parse_args()
+
+# Kijk na welke actie moet worden uitgevoerd
+if args.create:
+    csv_file = args.create
+    # Voer process_csv functie uit
+    process_csv(csv_file)
+elif args.group:
+    group_name = args.group
+    if args.file:
+        file_path = args.file
+        # Kijk na of het bestand bestaat
+        if os.path.isfile(file_path):
+            # Open het bestand in readmode
+            with open(file_path, 'r') as f:
+                # Gebruik splitlines om elke gebruiker op een aparte regel te nemen en in de lijst users te steken
+                users = f.read().splitlines()
             # Maak de groep aan met elke gebruiker in de groep users
             create_group(group_name, users)
+        else:
+            print(f"Bestand '{file_path}' bestaat niet.")
+    else:
+        users = sys.argv[3:]
+        # Maak de groep aan met elke gebruiker in de groep users
+        create_group(group_name, users)
 else:
-    print("Geef meer opties: minstens -c of -g")
+    parser.print_help()
