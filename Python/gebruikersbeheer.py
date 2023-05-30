@@ -147,6 +147,12 @@ parser.add_argument('-f', '--file', metavar='FILE', help='Bestand met lijst van 
 parser.add_argument('-d', '--delete', action='store_true', help='Delete users die behoren tot groep studenten en wiens usernames beginnen met "s".')
 parser.add_argument('-i', '--interactive', action='store_true', help='Vraag bevestiging voor users verwijderd worden')
 
+# TE IMPLEMENTEREN
+# parser.add_argument('-v', '--verbose', action='store_true', help='Meer output tonen')
+# parser.add_argument('-q', '--quiet', action='store_true', help='Minder output tonen')
+# parser.add_argument('-n', '--dry-run', action='store_true', help='Beschrijven wat er gedaan zou worden, maar het niet uitvoeren')
+
+
 
 # Parse de command line argumenten
 args = parser.parse_args()
