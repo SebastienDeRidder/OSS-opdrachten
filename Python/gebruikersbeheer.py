@@ -98,6 +98,45 @@ def create_group(group_name, users):
             print(f"Gebruiker '{user}' bestaat niet. Toevoegen aan groep '{group_name}' mislukt.")
 
 
+# Functie om users te verwijderen
+def delete_users():
+    users_to_delete = []
+    # Alle users op het systeem ophalen
+    for user in pwd.getpwall():
+        # Voor elke user op het systeem wordt gekeken naar alle groepen om te zien waar de huidige user lid van is
+        groups = [grp.gr_name for grp in grp.getgrall() if user.pw_name in grp.gr_mem]
+        # Controleren of de gebruikersnaam begint met 's' en dat ze lid zijn van de groep 'students'
+        if user.pw_name.startswith('s') and 'students' in groups:
+            users_to_delete.append(user.pw_name)
+
+    if len(users_to_delete) == 0:
+        print("Geen users gevonden")
+        return
+
+    print("Gevonden users:")
+    for user in users_to_delete:
+        print(user)
+
+    if args.interactive:
+        choice = input("Wil je deze users verwijderen? (J) ja, kies gebruikers /(N) nee / (A) ja, alle gebruikers: ")
+        if choice.upper() == 'A':
+            for user in users_to_delete:
+                subprocess.run(['userdel', user])
+                print(f"User '{user}' verwijderd.")
+        elif choice.upper() == 'J':
+            for user in users_to_delete:
+                confirm = input(f"Wil je user '{user}' verwijderen? (J) ja / (N) nee: ")
+                if confirm.upper() == 'J':
+                    subprocess.run(['userdel', user])
+                    print(f"User '{user}' verwijderd.")
+        else:
+            print("Abort.")
+    else:
+        for user in users_to_delete:
+            subprocess.run(['userdel', user])
+            print(f"User '{user}' verwijderd.")
+
+
 # Maak een argumentparser
 parser = argparse.ArgumentParser(description='Script voor het beheren van gebruikers en groepen.')
 
@@ -105,6 +144,9 @@ parser = argparse.ArgumentParser(description='Script voor het beheren van gebrui
 parser.add_argument('-c', '--create', metavar='FILE', help='Maak gebruikers aan op basis van een CSV-bestand.')
 parser.add_argument('-g', '--group', nargs='+', metavar=('GROUP_NAME', 'USERS'), help='Maak een nieuwe groep aan en voeg gebruikers toe.')
 parser.add_argument('-f', '--file', metavar='FILE', help='Bestand met lijst van gebruikers (een per regel).')
+parser.add_argument('-d', '--delete', action='store_true', help='Delete users die behoren tot groep studenten en wiens usernames beginnen met "s".')
+parser.add_argument('-i', '--interactive', action='store_true', help='Vraag bevestiging voor users verwijderd worden')
+
 
 # Parse de command line argumenten
 args = parser.parse_args()
@@ -132,5 +174,7 @@ elif args.group:
         users = sys.argv[3:]
         # Maak de groep aan met elke gebruiker in de groep users
         create_group(group_name, users)
+elif args.delete:
+    delete_users()
 else:
     parser.print_help()
