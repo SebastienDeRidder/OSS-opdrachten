@@ -6,6 +6,7 @@ import os
 import pwd
 import grp
 
+
 # Functie voor het aanmaken van nieuwe gebruikers
 def create_user(username, full_name, email, klasgroep, password, ssh_public_key):
     try:
@@ -54,6 +55,7 @@ def create_user(username, full_name, email, klasgroep, password, ssh_public_key)
 
     print(f"Gebruiker '{username}' is succesvol aangemaakt.")
 
+
 # Functie voor het gebruiken van het csv-bestand
 def process_csv(csv_file):
     # Open bestand in readmode
@@ -72,9 +74,61 @@ def process_csv(csv_file):
             # Voer create_user functie uit met parameters
             create_user(username, full_name, email, klasgroep, password, ssh_public_key)
 
-# Kijk na of er genoeg parameters zijn meegegeven met het commando om het script uit te voeren. Als de 2de parameter '-c' of '--create' is wordt de process_csv functie uitgevoerd.
-if len(sys.argv) == 3 and (sys.argv[1] == '-c' or sys.argv[1] == '--create'):
-    csv_file = sys.argv[2]
-    process_csv(csv_file)
+
+# Functie voor het aanmaken van een nieuwe groep en het toevoegen van gebruikers
+def create_group(group_name, users):
+    try:
+        # Kijk na of de groep al bestaat
+        grp.getgrnam(group_name)
+        print(f"Groep '{group_name}' bestaat al.")
+    except KeyError:
+        # Maak groep aan als hij niet bestaat
+        os.system(f"groupadd {group_name}")
+        print(f"Groep '{group_name}' is succesvol aangemaakt.")
+
+    # Voeg gebruikers toe aan de groep
+    for user in users:
+        try:
+            pwd.getpwnam(user)
+            os.system(f"usermod -aG {group_name} {user}")
+            print(f"Gebruiker '{user}' is toegevoegd aan groep '{group_name}'.")
+        except KeyError:
+            print(f"Gebruiker '{user}' bestaat niet. Toevoegen aan groep '{group_name}' mislukt.")
+
+
+# Kijk na of er 3 parameters zijn meegegeven
+if len(sys.argv) == 3:
+    # Kijk na of de 2de parameter '-c' of '--create' is
+    if sys.argv[1] == '-c' or sys.argv[1] == '--create':
+        csv_file = sys.argv[2]
+        # Voer process_csv functie uit
+        process_csv(csv_file)
+    else:
+        print("Gebruik: gebruikersbeheer.py -c <CSV-bestand>")
+# Kijk na of er 4 of meer parameters worden meegegeven
+elif len(sys.argv) >= 4:
+    # Kijk na of de 2de parameter '-g' of '--group' is
+    if sys.argv[1] == '-g' or sys.argv[1] == '--group':
+        # Kijk na of de 4de parameter '-f' is
+        if sys.argv[3] == '-f':
+            group_name = sys.argv[2]
+            file_path = sys.argv[4]
+            # Kijk na of het bestand bestaat
+            if os.path.isfile(file_path):
+                # Open het bestand in readmode
+                with open(file_path, 'r') as f:
+                    # Gebruik splitlines om elke user op een aparte lijn te nemen en in de lijst users te steken
+                    users = f.read().splitlines()
+                # Maak de groep aan met elke user in de groep users
+                create_group(group_name, users)
+            else:
+                print(f"Bestand '{file_path}' bestaat niet.")
+        else:
+            group_name = sys.argv[2]
+            users = sys.argv[3:]
+            # Maak de groep aan met elke user in de groep users
+            create_group(group_name, users)
+    else:
+        print("Ongeldige opties. Gebruik: gebruikersbeheer.py -g <groep> <gebruikers> of gebruikersbeheer.py -g <groep> -f <bestand>")
 else:
-    print("Gebruik: gebruikersbeheer.py -c <CSV-bestand>")
+    print("Gebruik: gebruikersbeheer.py -c <CSV-bestand> of gebruikersbeheer.py -g <groep> <gebruikers> of gebruikersbeheer.py -g <groep> -f <bestand>")
