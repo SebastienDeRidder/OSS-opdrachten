@@ -1,19 +1,13 @@
-
-$adServer = "192.168.0.111"
-$ouName = "OS Scripting 23"
+# Configuratie
+$adServer = "ADServerName"  # Naam van de Active Directory-server
+$ouName = "OS Scripting 23"  # Naam van de OU die moet worden aangemaakt
 
 # Controleer of de OU al bestaat
-$ouExists = Invoke-Command -ComputerName $adServer -ScriptBlock {
-    param($ouName)
-    Get-ADOrganizationalUnit -Filter "Name -eq '$ouName'"
-} -ArgumentList $ouName
+$ouExists = Get-ADOrganizationalUnit -Filter "Name -eq '$ouName'" -ErrorAction SilentlyContinue
 
 # Maak de OU aan als deze niet bestaat
 if (-not $ouExists) {
-    Invoke-Command -ComputerName $adServer -ScriptBlock {
-        param($ouName)
-        New-ADOrganizationalUnit -Name $ouName
-    } -ArgumentList $ouName
+    New-ADOrganizationalUnit -Name $ouName
 
     Write-Host "OU '$ouName' succesvol aangemaakt."
 } else {
