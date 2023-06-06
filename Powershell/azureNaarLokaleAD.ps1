@@ -1,3 +1,5 @@
+Import-Module AzureAD
+
 $ouParentName = "OS Scripting 23"  # Naam van de bovenliggende OU
 $ouChildName = "s122861"  # Naam van de sub-OU
 $ouGroupsName = "groups"
@@ -22,4 +24,25 @@ if (-not $ouParentExists) {
     Write-Host "OU '$ouUsersName' succesvol aangemaakt binnen OU '$ouChildName'."
 } else {
     Write-Host "OU '$ouParentName' bestaat al. Overslaan."
+}
+# Verbind met AzureAD
+Connect-AzureAD
+$username = "s122861@ap.be"
+$user = Get-AzureADUser -Filter "userPrincipalName eq '$username'"
+# Groepen waar $username lid van is ophalen
+$groups = Get-AzureADUserMembership -ObjectId $user.ObjectId | Get-AzureADGroup
+
+$groups | ForEach-Object {
+    # De DisplayName van elke groep bijhouden
+    $groupDisplayName = $($_.DisplayName)
+    $AzureGroups = "OU=$ouGroupsName,OU=$ouChildName,OU=$ouParentName,DC=sebas-tien,DC=com"
+    # Per DisplayName nakijken of er al een groep bestaat met die naam
+    if (-not (Get-ADGroup -Filter "Name -eq '$groupDisplayName'")) {
+        # Nieuwe groep maken 
+        New-ADGroup -Name $groupDisplayName -Path $AzureGroups -GroupScope Global
+        Write-Host "Groep '$groupDisplayName' werd succesvol aangemaakt."
+    } else {
+        Write-Host "Groep '$groupDisplayName' bestaat al. Skipping."
+    }
+
 }
