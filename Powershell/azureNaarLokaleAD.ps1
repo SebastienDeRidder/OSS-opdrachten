@@ -1,4 +1,5 @@
 Import-Module AzureAD
+Import-Module ActiveDirectory
 
 $ouParentName = "OS Scripting 23"  # Naam van de bovenliggende OU
 $ouChildName = "s122861"  # Naam van de sub-OU
@@ -73,9 +74,17 @@ $groups | ForEach-Object {
             # Check of de naam nog niet bestaat
             if (-not (Get-ADUser -Filter "Name -eq '$uniqueName'")) {
                 # Maak gebruiker aan
-                $password = ConvertTo-SecureString -String "SuperVeiligWachtwoord" -AsPlainText -Force
-                New-ADUser -Name $uniqueName -UserPrincipalName $memberUser.UserPrincipalName -GivenName $memberUser.GivenName -Surname $memberUser.Surname -Enabled $true -Path $AzureUsers -AccountPassword $password -PassThru | Out-Null # vermijd dat dit commando in console output 
-                Write-Host "User '$($memberUser.DisplayName)' is gemaakt in de 'users' OU."
+                $password = ConvertTo-SecureString -String "Sup3rVeiligWachtwoord" -AsPlainText -Force
+                $newUser = New-ADUser -Name $uniqueName -UserPrincipalName $memberUser.UserPrincipalName -GivenName $memberUser.GivenName -Surname $memberUser.Surname -Enabled $true -Path $AzureUsers -AccountPassword $password -PassThru
+
+                # Check of waarde van $newUser niet leeg is
+                # if ($newUser) {
+                #     # Voeg de gebruiker toe aan de groep
+                #     Add-ADGroupMember -Identity $sanitizedDisplayName -Members $newUser
+                #     Write-Host "User '$($memberUser.DisplayName)' is gemaakt in de 'users' OU en toegevoegd aan de groep '$($sanitizedDisplayName)'."
+                # } else {
+                #     Write-Host "Fout bij het maken van gebruiker '$($memberUser.DisplayName)' in de 'users' OU."
+                # }
             }
             else {
                 Write-Host "User '$($memberUser.DisplayName)' bestaat al in de 'users' OU. Skipping."
