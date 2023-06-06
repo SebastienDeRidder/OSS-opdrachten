@@ -75,7 +75,8 @@ $groups | ForEach-Object {
             if (-not (Get-ADUser -Filter "Name -eq '$uniqueName'")) {
                 # Maak gebruiker aan
                 $password = ConvertTo-SecureString -String "Sup3rVeiligWachtwoord" -AsPlainText -Force
-                $newUser = New-ADUser -Name $uniqueName -UserPrincipalName $memberUser.UserPrincipalName -GivenName $memberUser.GivenName -Surname $memberUser.Surname -Enabled $true -Path $AzureUsers -AccountPassword $password -PassThru
+                # $newUser = 
+                New-ADUser -Name $uniqueName -UserPrincipalName $memberUser.UserPrincipalName -GivenName $memberUser.GivenName -Surname $memberUser.Surname -Enabled $true -Path $AzureUsers -AccountPassword $password -PassThru
 
                 # Check of waarde van $newUser niet leeg is
                 # if ($newUser) {
