@@ -1,15 +1,26 @@
-# Configuratie
-$adServer = "ADServerName"  # Naam van de Active Directory-server
-$ouName = "OS Scripting 23"  # Naam van de OU die moet worden aangemaakt
+$ouParentName = "OS Scripting 23"  # Naam van de bovenliggende OU
+$ouChildName = "s122861"  # Naam van de sub-OU
+$ouChildPath = "OU=$ouChildName,OU=$ouParentName,DC=sebas-tien.com,DC=local" # Pad in AD
+$ouGroupsName = "groups"
+$ouUsersName = "users"
 
-# Controleer of de OU al bestaat
-$ouExists = Get-ADOrganizationalUnit -Filter "Name -eq '$ouName'" -ErrorAction SilentlyContinue
+# Controleer of de bovenliggende OU bestaat
+$ouParentExists = Get-ADOrganizationalUnit -Filter "Name -eq '$ouParentName'"
 
-# Maak de OU aan als deze niet bestaat
-if (-not $ouExists) {
-    New-ADOrganizationalUnit -Name $ouName
+# Maak de OU's aan als deze niet bestaan
+if (-not $ouParentExists) {
+    New-ADOrganizationalUnit -Name $ouParentName
+    Write-Host "OU '$ouParentName' succesvol aangemaakt."
 
-    Write-Host "OU '$ouName' succesvol aangemaakt."
+    # Maak de sub-OU aan
+    New-ADOrganizationalUnit -Name $ouChildName -Path $ouParentPath
+    Write-Host "OU '$ouChildName' succesvol aangemaakt binnen OU '$ouParentName'."
+
+    # Maak de sub-OU's "groups" en "users" binnen de sub-OU aan
+    New-ADOrganizationalUnit -Name $ouGroupsName -Path $ouChildPath
+    Write-Host "OU '$ouGroupsName' succesvol aangemaakt binnen OU '$ouChildName'."
+    New-ADOrganizationalUnit -Name $ouUsersName -Path $ouChildPath
+    Write-Host "OU '$ouUsersName' succesvol aangemaakt binnen OU '$ouChildName'."
 } else {
-    Write-Host "OU '$ouName' bestaat al. Overslaan."
+    Write-Host "OU '$ouParentName' bestaat al. Overslaan."
 }
