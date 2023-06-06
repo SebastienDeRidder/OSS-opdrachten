@@ -73,21 +73,22 @@ $groups | ForEach-Object {
             
             # Check of de naam nog niet bestaat
             if (-not (Get-ADUser -Filter "Name -eq '$uniqueName'")) {
-                # Maak gebruiker aan
-                $password = ConvertTo-SecureString -String "Sup3rVeiligWachtwoord" -AsPlainText -Force
-                # $newUser = 
-                New-ADUser -Name $uniqueName -UserPrincipalName $memberUser.UserPrincipalName -GivenName $memberUser.GivenName -Surname $memberUser.Surname -Enabled $true -Path $AzureUsers -AccountPassword $password -PassThru
+                try {
+                    # Maak gebruiker aan
+                    $password = ConvertTo-SecureString -String "Sup3rVeiligWachtwoord" -AsPlainText -Force
+                    $newUser = New-ADUser -Name $uniqueName -UserPrincipalName $memberUser.UserPrincipalName -GivenName $memberUser.GivenName -Surname $memberUser.Surname -Enabled $true -Path $AzureUsers -AccountPassword $password -PassThru
 
-                # Check of waarde van $newUser niet leeg is
-                # if ($newUser) {
-                #     # Voeg de gebruiker toe aan de groep
-                #     Add-ADGroupMember -Identity $sanitizedDisplayName -Members $newUser
-                #     Write-Host "User '$($memberUser.DisplayName)' is gemaakt in de 'users' OU en toegevoegd aan de groep '$($sanitizedDisplayName)'."
-                # } else {
-                #     Write-Host "Fout bij het maken van gebruiker '$($memberUser.DisplayName)' in de 'users' OU."
-                # }
-            }
-            else {
+                    if ($newUser) {
+                        # Voeg de gebruiker toe aan de groep
+                        Add-ADGroupMember -Identity $sanitizedDisplayName -Members $newUser
+                        Write-Host "User '$($memberUser.DisplayName)' is gemaakt in de 'users' OU en toegevoegd aan de groep '$($sanitizedDisplayName)'."
+                    } else {
+                        Write-Host "Fout bij het maken van gebruiker '$($memberUser.DisplayName)' in de 'users' OU."
+                    }
+                } catch {
+                    Write-Host "Er is een fout opgetreden bij het maken van gebruiker '$($memberUser.DisplayName)': $_"
+                }
+            } else {
                 Write-Host "User '$($memberUser.DisplayName)' bestaat al in de 'users' OU. Skipping."
             }
         }
